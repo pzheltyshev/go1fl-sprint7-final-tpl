@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -47,4 +48,36 @@ func TestCafeWhenOk(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, response.Code)
 	}
+}
+
+func TestCafeCount(t *testing.T) {
+	handler := http.HandlerFunc(mainHandle)
+
+	city := "moscow"
+
+	requests := []struct {
+		count int
+		want  int
+	}{
+		{0, 0},
+		{1, 1},
+		{2, 2},
+		{100, min(100, len(cafeList[city]))},
+	}
+
+	for _, v := range requests {
+		response := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/cafe?count="+strconv.Itoa(v.count)+"&city="+city, nil)
+
+		handler.ServeHTTP(response, req)
+
+		bodyStr := strings.TrimSpace(response.Body.String())
+		var resList []string
+		if bodyStr != "" {
+			resList = strings.Split(bodyStr, ",")
+		}
+
+		assert.Equal(t, v.want, len(resList))
+	}
+
 }

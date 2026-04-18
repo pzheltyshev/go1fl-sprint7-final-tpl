@@ -25,6 +25,7 @@ func mainHandle(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+
 	city := req.FormValue("city")
 	cafe, ok := cafeList[city]
 	if !ok {
